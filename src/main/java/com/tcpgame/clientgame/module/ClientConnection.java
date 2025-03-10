@@ -23,26 +23,19 @@ public class ClientConnection {
             // Start a thread to listen for messages
             new Thread(() -> {
                 try {
-//                    String receivedMessage;
-//                    while (!Objects.equals(receivedMessage = in.readLine(), "STOP") || !FINISH) {
-//                        if(receivedMessage!=null){
-//                            System.out.println("Received: " + receivedMessage);
-//                        }
-//                    }
-//                    if(receivedMessage.equals("STOP")){
-//                        System.out.println("Client stopped by the server.");
-//                    }else {
-//                        System.out.println("Disconnection done!");
-//                    }
-
-                    while (!FINISH) {
-                        String receivedMessage = in.readLine();
-                        if(receivedMessage!=null && !receivedMessage.equals("STOP")){
+                    String receivedMessage;
+                    while (!Objects.equals(receivedMessage = in.readLine(), "STOP") || !FINISH) {
+                        if(receivedMessage!=null){
                             System.out.println("Received: " + receivedMessage);
                         }
                     }
+                    if(receivedMessage.equals("STOP")){
+                        System.out.println("Client stopped by the server.");
+                    }else {
+                        System.out.println("Disconnection done!");
+                    }
 
-//                    FINISH = true;
+                    FINISH = true;
 
                 } catch (Exception e) {
                     System.err.println("Error in receiving messages: " + e.getMessage());
