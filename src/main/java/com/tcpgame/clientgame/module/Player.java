@@ -13,6 +13,13 @@ public class Player {
         this.score = score;
     }
 
+    public Player(String id, String name, int health, int score) {
+        this.name = name;
+        this.id = id;
+        this.health = health;
+        this.score = score;
+    }
+
     public void setId(String id) {
         this.id = id;
     }

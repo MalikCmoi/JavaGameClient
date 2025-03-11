@@ -30,23 +30,12 @@ public class PlayerAction {
 
     // Constructeurs, getters et setters
 
-    public PlayerAction(String action, String player) {
-        this.action = action;
-        this.player = player;
-    }
 
-    // Surcharge pour CanMove
-    public PlayerAction(String action, String player, int x, int y) {
+    public PlayerAction(String action, String player, Integer x, Integer y, String idPlayer) {
         this.action = action;
         this.player = player;
         this.x = x;
         this.y = y;
-    }
-
-    // Surcharge pour CanAttack
-    public PlayerAction(String action, String player, String idPlayer) {
-        this.action = action;
-        this.player = player;
         this.idPlayer = idPlayer;
     }
 
