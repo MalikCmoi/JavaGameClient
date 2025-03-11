@@ -37,16 +37,19 @@ public class ClientConnection {
                             switch (action.getAction()) {
                                 case "newPlayer":
 
-                                    if(action.getPlayer().equals("me") && player!=null){
+                                    if(action.getName().equals("me") && player!=null){
+                                        System.out.println("me: " + action.getIdPlayer());
                                         player.setId(action.getIdPlayer());
+                                        System.out.println("me Player: " + player.getId());
+
                                     }else{
-                                        playersConnected.put(action.getIdPlayer(), new Player(action.getIdPlayer(),action.getPlayer(),100,100));
+                                        playersConnected.put(action.getIdPlayer(), new Player(action.getIdPlayer(),action.getName(),100,100));
                                     }
-                                   System.out.println("New player connected: " + action.getPlayer());
+                                   System.out.println("New player connected: " + action.getName());
                                     break;
-                                case "disconnect":
-                                    send(out,jsonMessageGenerator.disconnect(player));
-                                    send(out,"coucou");
+                                case "deletePlayer":
+                                    System.out.println("Player disconnected: " + action.getIdPlayer());
+
                                     break;
                                 case "CanMove":
 //                                    send(out,jsonMessageGenerator.canMove(player,1,1));
@@ -95,8 +98,9 @@ public class ClientConnection {
                             send(out,jsonMessageGenerator.connect(player));
                             break;
                         case "disconnect":
+
+                            System.out.println(player.getId());
                             send(out,jsonMessageGenerator.disconnect(player));
-                            send(out,"coucou");
                             break;
                         case "CanMove":
 //                            send(out,jsonMessageGenerator.canMove(player,1,1));

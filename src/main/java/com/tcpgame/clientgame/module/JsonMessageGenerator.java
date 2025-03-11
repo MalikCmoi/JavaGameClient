@@ -6,12 +6,12 @@ public class JsonMessageGenerator {
     private Gson gson = new Gson();
 
     public String connect(Player player) {
-        PlayerAction msg = new PlayerAction("connect", player.getName(), null, null, null);
+        PlayerAction msg = new PlayerAction("connect",  player.getId(), player.getName(),null, null );
         return gson.toJson(msg);
     }
 
     public String disconnect(Player player) {
-        PlayerAction msg = new PlayerAction("disconnect", String.valueOf(player.getId()), null, null, null);
+        PlayerAction msg = new PlayerAction("disconnect", player.getId(), player.getId(), null, null);
         return gson.toJson(msg);
     }
 //
