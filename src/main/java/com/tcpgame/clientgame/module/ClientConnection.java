@@ -13,6 +13,8 @@ public class ClientConnection {
     private static Dictionary<String, Player> playersConnected = new Hashtable<>();
     private static Thread listeningThread;
     private static Thread userInputThread;
+    private static final int SIZEMAP = 10;
+    private static String[][] map = new String[SIZEMAP][SIZEMAP];
 
     public static void main(String[] args) {
         try (Socket socket = new Socket("localhost", PORT);
@@ -78,6 +80,7 @@ public class ClientConnection {
 
     private static void handleServerMessage(String receivedMessage) {
         Gson gson = new Gson();
+        System.out.println(receivedMessage);
         PlayerAction action = gson.fromJson(receivedMessage, PlayerAction.class);
 
         switch (action.getAction()) {
@@ -85,16 +88,40 @@ public class ClientConnection {
                 if ("me".equals(action.getName()) && player != null) {
                     System.out.println("my ID: " + action.getIdPlayer());
                     player.setId(action.getIdPlayer());
+
+                    player.Move(new int[]{action.getX(), action.getY()});
+                    map[action.getX()][action.getY()] = player.getId();
                 } else {
                     System.out.println("Player add Id: " + receivedMessage);
                     playersConnected.put(action.getIdPlayer(), new Player(action.getIdPlayer(), action.getName(), 100, 100));
+                    playersConnected.get(action.getIdPlayer()).Move(new int[]{action.getX(), action.getY()});
+                    map[action.getX()][action.getY()] = action.getIdPlayer();
+
                     System.out.println("New player connected: " + action.getIdPlayer());
                 }
                 break;
             case "deletePlayer":
                 if (playersConnected.get(action.getIdPlayer()) != null) {
+                    map[playersConnected.get(action.getIdPlayer()).getPosition()[0]][playersConnected.get(action.getIdPlayer()).getPosition()[1]] = null;
                     playersConnected.remove(action.getIdPlayer());
                     System.out.println("Player disconnected: " + action.getIdPlayer());
+                } else {
+                    System.out.println("Player does not exist: " + action.getIdPlayer());
+                }
+                break;
+            case "movePlayer":
+                if(action.getName().equals("Me")) {
+                    map[player.getPosition()[0]][player.getPosition()[1]] = null;
+                    movePlayer(action.getX(), action.getY());
+                    map[action.getX()][action.getY()] = player.getId();
+                    System.out.println(player.getName()+" your mouvement is valid and actif !");
+
+                }
+                else if (playersConnected.get(action.getIdPlayer()) != null) {
+                    playersConnected.get(action.getIdPlayer()).Move(new int[]{action.getX(), action.getY()});
+                    map[playersConnected.get(action.getIdPlayer()).getPosition()[0]][playersConnected.get(action.getIdPlayer()).getPosition()[1]] = null;
+                    map[action.getX()][action.getY()] = action.getIdPlayer();
+                    System.out.println("Player moved: " + action.getIdPlayer());
                 } else {
                     System.out.println("Player does not exist: " + action.getIdPlayer());
                 }
@@ -103,6 +130,8 @@ public class ClientConnection {
                 System.out.println("Commande inconnue: " + receivedMessage);
         }
     }
+
+
 
     private static void processUserCommand(String input, PrintWriter out, Scanner scanner, Socket socket, JsonMessageGenerator jsonMessageGenerator) {
         switch (input) {
@@ -120,9 +149,37 @@ public class ClientConnection {
             case "showPlayer":
                 if (!playersConnected.isEmpty()) {
                     Collections.list(playersConnected.elements()).forEach(p ->
-                            System.out.println(p.getName() + " : " + p.getHealth()));
+                            System.out.println(p.getName() + " : " + p.getHealth() + " : " + Arrays.toString(p.getPosition())));
                 }
                 System.out.println("Nombre de joueurs connectés: " + playersConnected.size());
+                break;
+            case "move":
+                System.out.println("Vous êtes en position: " + Arrays.toString(player.getPosition()));
+                System.out.println("Quelle direction? (UP,DOWN,LEFT,RIGHT)");
+                String direction = scanner.nextLine();
+                int[] position = player.getPosition();
+                switch (direction) {
+                    case "UP":
+                        canMove(position[0], position[1] - 1, out, jsonMessageGenerator);
+                        break;
+                    case "DOWN":
+                        if(position[0]+ 1 < 10 && map[position[0]- 1][position[1]] == null) {
+                            canMove(position[0], position[1] + 1, out, jsonMessageGenerator);
+                        }
+                        break;
+                    case "LEFT":
+                        if(position[0]+ 1 < 10 && map[position[0]- 1][position[1]] == null) {
+                            canMove(position[0] - 1, position[1], out, jsonMessageGenerator);
+                        }
+                        break;
+                    case "RIGHT":
+                        if(position[0]+ 1 < 10 && map[position[0]+ 1][position[1]] == null) {
+                            canMove(position[0] + 1, position[1], out, jsonMessageGenerator);
+                        }
+                        break;
+                    default:
+                        System.out.println("Direction inconnue");
+                }
                 break;
             default:
                 System.out.println("Commande inconnue");
@@ -142,6 +199,18 @@ public class ClientConnection {
             } catch (IOException e) {
                 System.out.println("Client arrêté par le serveur.");
             }
+        }
+    }
+
+    private static void canMove(int x, int y,PrintWriter out, JsonMessageGenerator jsonMessageGenerator) {
+        if (player != null) {
+            send(out, jsonMessageGenerator.canMove(player, x, y));
+        }
+    }
+
+    private static void movePlayer(int x, int y) {
+        if (player != null) {
+            player.Move(new int[]{x, y});
         }
     }
 
